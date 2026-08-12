@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 
-TEACHER_REPORT_VIEW_VERSION = "teacher-report-view-v6"
+TEACHER_REPORT_VIEW_VERSION = "teacher-report-view-v7"
 
 TEACHER_REPORT_FIELDS = frozenset(
     {
@@ -25,6 +25,7 @@ TEACHER_REPORT_FIELDS = frozenset(
         "priority_questions",
         "student_summaries",
         "review_items",
+        "taxonomy_candidates",
         "teaching_actions",
         "notes",
     }
@@ -70,6 +71,7 @@ def validate_teacher_report_model(model: Any) -> list[str]:
         "priority_questions",
         "student_summaries",
         "review_items",
+        "taxonomy_candidates",
         "teaching_actions",
         "notes",
     ):

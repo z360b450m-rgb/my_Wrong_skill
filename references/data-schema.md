@@ -41,12 +41,15 @@
 - `first_error_step`
 - `evidence`
 - `error_tags`
+- `suggested_tags`（仅用于未收录的错因或知识点候选项）
 - `source`
 - 可选 `teacher_review`
 
 `review_status` 只能为 `unreviewed`、`provisional`、`needs_review`、`auto_confirmed`、`teacher_confirmed` 或 `rejected`。
 
-运行时契约与 JSON Schema 使用相同资源边界：单文档最多 10,000 道题、100,000 次作答，每次作答最多 10,000 个响应，每个响应最多 1,000 条证据，语义向量最多 8,192 维，普通文本最多 100,000 字符。答案只允许标量、标量数组或 `null`，不得使用对象或嵌套数组。
+`suggested_tags` 中每项使用 `dimension`（`error` 或 `knowledge`）、`name`、`confidence`、可选 `display_name`、可选 `definition` 与可选 `evidence_ids`。它们不会参与正式统计，直到教师审核批准并由 Agent 在后续输入中复用。
+
+运行时契约与 JSON Schema 使用相同资源边界：单文档最多 10,000 道题、100,000 次作答，每次作答最多 10,000 个响应，每个响应最多 1,000 条证据，普通文本最多 100,000 字符。答案只允许标量、标量数组或 `null`，不得使用对象或嵌套数组。
 
 ## 证据和来源
 

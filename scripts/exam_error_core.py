@@ -532,13 +532,14 @@ def _validate_tag(
     evidence_ids: set[str] | None = None,
     controlled_names: bool = True,
     require_evidence: bool = True,
+    extension_error_names: set[str] | None = None,
 ) -> None:
     if not isinstance(tag, dict):
         errors.append(f"{location}: must be an object")
         return
     _reject_unknown_fields(
         tag,
-        {"dimension", "name", "confidence", "evidence_ids"},
+        {"dimension", "name", "display_name", "definition", "confidence", "evidence_ids"},
         location,
         errors,
     )
@@ -551,9 +552,13 @@ def _validate_tag(
         errors.append(f"{location}.dimension: invalid value")
     if not isinstance(name, str) or not name:
         errors.append(f"{location}.name: must be a non-empty string")
+    for optional_text in ("display_name", "definition"):
+        value = tag.get(optional_text)
+        if value is not None and (not isinstance(value, str) or not value.strip()):
+            errors.append(f"{location}.{optional_text}: must be a non-empty string or null")
     if controlled_names and dimension == "cognitive" and name not in COGNITIVE_TAGS:
         errors.append(f"{location}.name: unsupported cognitive tag {name}")
-    if controlled_names and dimension == "error" and name not in ERROR_TAGS:
+    if controlled_names and dimension == "error" and name not in (ERROR_TAGS | (extension_error_names or set())):
         errors.append(f"{location}.name: unsupported error tag {name}")
     _validate_confidence(tag.get("confidence"), f"{location}.confidence", errors)
     if dimension == "error" and require_evidence:
@@ -568,7 +573,7 @@ def _validate_tag(
                 errors.append(f"{location}.evidence_ids: evidence is required")
 
 
-def validate_v2(data: Any) -> list[str]:
+def validate_v2(data: Any, extension_error_names: set[str] | None = None) -> list[str]:
     errors: list[str] = []
     if not isinstance(data, dict):
         return ["root: must be an object"]
@@ -952,6 +957,7 @@ def validate_v2(data: Any) -> list[str]:
                         errors,
                         {"error"},
                         evidence_ids,
+                        extension_error_names=extension_error_names,
                     )
             suggested = response.get("suggested_tags")
             if not isinstance(suggested, list):
@@ -962,7 +968,7 @@ def validate_v2(data: Any) -> list[str]:
                         tag,
                         f"{response_location}.suggested_tags[{tag_index}]",
                         errors,
-                        {"error"},
+                        {"error", "knowledge"},
                         evidence_ids,
                         controlled_names=False,
                         require_evidence=False,

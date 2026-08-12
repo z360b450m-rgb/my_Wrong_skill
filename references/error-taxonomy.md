@@ -1,6 +1,8 @@
 # 受控错因分类法
 
-正式错因标签只使用下列名称；未覆盖的新标签先放入 `suggested_tags`，不得自动进入正式词表。
+正式错因标签只使用下列名称；未覆盖的新错因或知识点先放入 `suggested_tags`，不得自动进入正式词表。
+
+扩展流程使用 `taxonomy/extensions.json`：Agent 只可新增 `pending` 候选项；教师在 HTML 报告中导出审核决定后，使用 `scripts/exam_error_cli.py taxonomy apply` 写入 `approved` 或 `rejected` 状态。只有 `approved` 项可以在后续分析中复用，Skill 的基础词表不会被运行过程改写。
 
 | 分组 | 标签 |
 |---|---|

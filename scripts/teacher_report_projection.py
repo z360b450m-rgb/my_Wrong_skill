@@ -78,10 +78,15 @@ def build_teacher_report_model(
     *,
     statistics_builder: Callable[[dict[str, Any]], dict[str, Any]],
     review_exporter: Callable[[dict[str, Any]], dict[str, Any]],
+    taxonomy_labels: dict[str, dict[str, str]] | None = None,
+    taxonomy_candidates: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build the only model accepted by the fixed teacher-report renderer."""
     stats = statistics_builder(data)
     review_export = review_exporter(data)
+    taxonomy_labels = taxonomy_labels or {"error": {}, "knowledge": {}}
+    error_label = lambda code: taxonomy_labels.get("error", {}).get(code) or display.error_label(code)
+    knowledge_label = lambda code: taxonomy_labels.get("knowledge", {}).get(code) or display.knowledge_label(code)
     paper = data["paper"]
     questions = {item["question_id"]: item for item in paper["questions"]}
     student_name_sets: dict[str, set[str]] = {}
@@ -111,7 +116,7 @@ def build_teacher_report_model(
             "max_score": question.get("max_score"),
             "knowledge": sorted(
                 {
-                    display.knowledge_label(tag.get("name"))
+                    knowledge_label(tag.get("name"))
                     for tag in question.get("tags", [])
                     if tag.get("dimension") == "knowledge" and tag.get("name")
                 }
@@ -162,7 +167,7 @@ def build_teacher_report_model(
                         "observed": first.get("observed") or "无可用证据",
                         "explanation": first.get("explanation") or "",
                         "error_tags": [
-                            display.error_label(name) for name in error_names
+                            error_label(name) for name in error_names
                         ],
                         "confidence": response.get("confidence", {}),
                     }
@@ -172,7 +177,7 @@ def build_teacher_report_model(
     for item in insight.values():
         item["lost_score"] = decimal_json(item["lost_score"])
         item["error_counts"] = [
-            {"code": name, "name": display.error_label(name), "count": count}
+            {"code": name, "name": error_label(name), "count": count}
             for name, count in sorted(
                 item["error_counts"].items(), key=lambda pair: (-pair[1], pair[0])
             )
@@ -199,10 +204,10 @@ def build_teacher_report_model(
     )
 
     knowledge = _distribution_rows(
-        stats["tag_distribution"]["knowledge"], display.knowledge_label
+        stats["tag_distribution"]["knowledge"], knowledge_label
     )
     errors = _distribution_rows(
-        stats["tag_distribution"]["error"], display.error_label
+        stats["tag_distribution"]["error"], error_label
     )
 
     review_by_student = Counter(
@@ -265,10 +270,10 @@ def build_teacher_report_model(
         student["student_name"] = names[0] if names else "姓名待补充"
         student["name_conflict"] = len(names) > 1
         error_codes, main_errors = _top_codes(
-            student.pop("error_counts"), display.error_label
+            student.pop("error_counts"), error_label
         )
         knowledge_codes, weak_knowledge = _top_codes(
-            student.pop("knowledge_counts"), display.knowledge_label
+            student.pop("knowledge_counts"), knowledge_label
         )
         incorrect_question_codes = sorted(
             student.pop("incorrect_question_codes"),
@@ -403,6 +408,7 @@ def build_teacher_report_model(
         "priority_questions": question_rows,
         "student_summaries": student_summaries,
         "review_items": review_items,
+        "taxonomy_candidates": taxonomy_candidates or [],
         "teaching_actions": actions,
         "notes": [
             stats.get("multi_tag_note", ""),

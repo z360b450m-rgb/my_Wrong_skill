@@ -1,6 +1,6 @@
 ---
 name: analyze-exam-errors
-description: 面向教师生成单份 HTML 错题分析报告。适用于试卷图片、PDF、电子答卷或 v1/v2 考试 JSON；完成作答提取、客观题确定性评分、主观题逐评分点建议、错因归纳与教师复核提示，只交付一份离线 HTML 报告。
+description: 面向教师生成单份 HTML 错题分析报告，并以教师审核方式扩展错因和知识点词库。适用于试卷图片、PDF、电子答卷或 v1/v2 考试 JSON；完成作答提取、客观题确定性评分、主观题逐评分点建议、错因归纳、词库候选审核与复核提示，只交付一份离线 HTML 报告。
 ---
 
 # 角色设定
@@ -36,17 +36,26 @@ description: 面向教师生成单份 HTML 错题分析报告。适用于试卷�
 
 将内容整理为 v2 JSON。保留原始 OCR 文本；题号对应、学生答案或数学符号不可靠时填 `null`，并写入复核原因。
 
+先读取 `taxonomy/extensions.json` 中已批准的扩展词库。已存在的错因或知识点可直接复用；未存在的项目只能写入作答的 `suggested_tags`，并注明 `dimension`（`error` 或 `knowledge`）、`name`、可选的 `display_name`、`definition` 与证据。不得自行修改 `SKILL.md`、基础分类法或把候选项写入正式标签。
+
 ### 第三步：执行分析与生成报告
 
 运行：
 
 ```text
-python scripts/exam_error_cli.py <输入.json> <教师报告.html>
+python scripts/exam_error_cli.py <输入.json> <教师报告.html> --taxonomy <可写入的extensions.json>
 ```
 
 - 客观题按既定规则确定性评分。
 - 主观题必须结合学生作答、参考答案和每个评分点生成建议；已有评分点建议分与证据时一并保留。
 - 主观题建议分仅供教师复核，未经教师确认不得视为最终成绩。
+- 脚本会把新候选项登记为“待定”，HTML 中的“词库审核”区供教师批准、修改或驳回。浏览器不能直接改写本地文件，教师需导出 `词库审核决定.json` 后运行：
+
+```text
+python scripts/exam_error_cli.py taxonomy apply <词库审核决定.json> --taxonomy <可写入的extensions.json>
+```
+
+只有批准的项目才会在下一次分析中作为扩展词库标签复用；被驳回项目不应再次自动提出。
 
 ### 第四步：交付
 
@@ -73,6 +82,7 @@ python scripts/exam_error_cli.py <输入.json> <教师报告.html>
 - 不得杜撰参考答案、评分标准、学生作答或实验/考试背景。
 - 客观题可自动评分；主观题必须保留教师确认入口。
 - 每个错因必须关联可追溯的作答或证据，不得从单次作答推断学生能力、态度或人格。
+- Agent 只能新增待定候选项，不能批准、驳回或覆盖教师已经审核的词库记录。
 - 默认不向外部服务发送学生数据；仅在用户明确授权且平台允许时使用外部能力。
 
 ## 平台适配说明

@@ -14,10 +14,10 @@ from exam_error_app.teacher_report_contract import (
 )
 
 
-TEACHER_REPORT_RENDERER_VERSION = "teacher-report-renderer-v14"
-TEACHER_REPORT_TEMPLATE_VERSION = "teacher-report-ui-v14"
+TEACHER_REPORT_RENDERER_VERSION = "teacher-report-renderer-v15"
+TEACHER_REPORT_TEMPLATE_VERSION = "teacher-report-ui-v15"
 TEACHER_REPORT_TEMPLATE_SHA256 = (
-    "543e65875c71d5f87a49da937e586d323b4f0f184456041cb5e2c02390b0778e"
+    "24df082ec6acc0cf55268f9de7cd6912d4852e1b0370bb01f9f342cd35dffb83"
 )
 
 

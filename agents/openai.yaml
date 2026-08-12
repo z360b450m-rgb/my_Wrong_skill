@@ -1,4 +1,4 @@
 interface:
-  display_name: "商用错题归因分析"
-  short_description: "证据化错题评分、教师复核、星图教学报告与百万级本地混合检索"
-  default_prompt: "使用 $analyze-exam-errors 分析这份试卷，生成可审计的错因报告、复核队列和检索索引。"
+  display_name: "错题教师报告"
+  short_description: "从答卷生成一份可复核的教师 HTML 报告"
+  default_prompt: "使用 $analyze-exam-errors 分析这份试卷和答卷，只生成一份教师 HTML 报告。"

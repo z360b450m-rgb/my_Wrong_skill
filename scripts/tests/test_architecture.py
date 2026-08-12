@@ -20,7 +20,6 @@ from exam_error_app.retrieval_projection import project_index_records  # noqa: E
 from exam_error_app.teacher_report import TeacherReportApplication  # noqa: E402
 from exam_error_core import (  # noqa: E402
     MAX_ATTEMPTS,
-    MAX_EMBEDDING_DIMENSION,
     MAX_EVIDENCE_PER_RESPONSE,
     MAX_QUESTIONS,
     MAX_RESPONSES_PER_ATTEMPT,
@@ -61,10 +60,6 @@ class ArchitectureTests(unittest.TestCase):
         self.assertEqual(
             definitions["response"]["properties"]["evidence"]["maxItems"],
             MAX_EVIDENCE_PER_RESPONSE,
-        )
-        self.assertEqual(
-            definitions["question"]["properties"]["semantic_embedding"]["maxItems"],
-            MAX_EMBEDDING_DIMENSION,
         )
 
     def test_application_pipeline_uses_ports_in_fixed_order(self):
@@ -168,7 +163,7 @@ class ArchitectureTests(unittest.TestCase):
             {"normalized_answer": "x^2+1"},
         )
         self.assertEqual(result.score, Decimal("5"))
-        self.assertIn(result.confidence, {0.75, 0.98})
+        self.assertEqual(result.confidence, 1.0)
 
     def test_application_package_does_not_import_outer_adapters(self):
         forbidden = {"exam_error_cli", "exam_error_core", "reporting", "retrieval_engine"}

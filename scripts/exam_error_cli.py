@@ -32,15 +32,7 @@ from teacher_report_renderer import (
     render_teacher_report_html,
     write_teacher_report_html,
 )
-from retrieval_engine import (
-    ComponentUnavailable,
-    benchmark,
-    build_embedding_provider,
-    index_document,
-    purge_records,
-    search_index,
-    verify_database_audit,
-)
+from retrieval_engine import benchmark, index_document, purge_records, search_index, verify_database_audit
 from resource_limits import read_json_bounded, write_json_spooled
 
 
@@ -77,15 +69,6 @@ def default_pipeline() -> AnalysisPipeline:
         build_statistics=compute_statistics,
         build_graph=build_graph,
         schema_version=SCHEMA_VERSION,
-    )
-
-
-def provider_from_args(args: argparse.Namespace):
-    return build_embedding_provider(
-        getattr(args, "embedding_provider", None),
-        getattr(args, "model_path", None),
-        getattr(args, "model_license", None),
-        getattr(args, "model_sha256", None),
     )
 
 
@@ -201,14 +184,10 @@ def cmd_teacher_report(args: argparse.Namespace) -> int:
 def cmd_index(args: argparse.Namespace) -> int:
     data = read_json(args.input)
     require_valid(data)
-    provider = provider_from_args(args)
     result = index_document(
         data,
         args.database,
         mode=args.action,
-        embedding_provider=provider,
-        vector_path=args.vector_index,
-        require_semantic=args.require_semantic,
         memory_threshold_mb=args.memory_threshold_mb,
         spill_directory=args.spill_dir,
     )
@@ -217,16 +196,12 @@ def cmd_index(args: argparse.Namespace) -> int:
 
 
 def cmd_search(args: argparse.Namespace) -> int:
-    provider = provider_from_args(args)
     result = search_index(
         args.database,
         args.query,
         filters=parse_filters(args),
         top_k=args.top_k,
         candidate_limit=args.candidate_limit,
-        embedding_provider=provider,
-        vector_path=args.vector_index,
-        require_semantic=args.require_semantic,
     )
     write_json(args.output, result)
     return 0
@@ -258,7 +233,6 @@ def cmd_purge(args: argparse.Namespace) -> int:
         args.database,
         student_ref=args.student_ref,
         attempt_id=args.attempt_id,
-        vector_path=args.vector_index,
     )
     write_json(args.output, result)
     return 0
@@ -292,7 +266,6 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
         args.records,
         args.queries,
         args.database,
-        include_semantic=args.include_semantic,
     )
     write_json(args.output, result)
     return 0
@@ -302,22 +275,6 @@ def cmd_capabilities(args: argparse.Namespace) -> int:
     result = collect_runtime_capabilities(SKILL_DIR)
     write_json(args.output, result)
     return 0 if result["runtime"]["core"]["ready"] else 1
-
-
-def add_embedding_options(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "--embedding-provider",
-        choices=["none", "sentence-transformers", "onnx", "hashing"],
-        default="none",
-    )
-    parser.add_argument("--model-path")
-    parser.add_argument("--model-license")
-    parser.add_argument(
-        "--model-sha256",
-        help="approved SHA-256 fingerprint of the complete local model directory",
-    )
-    parser.add_argument("--vector-index")
-    parser.add_argument("--require-semantic", action="store_true")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -391,7 +348,6 @@ def build_parser() -> argparse.ArgumentParser:
     index.add_argument("--output", default="-")
     index.add_argument("--memory-threshold-mb", type=int, default=None)
     index.add_argument("--spill-dir")
-    add_embedding_options(index)
     index.set_defaults(func=cmd_index)
 
     search = subparsers.add_parser("search", help="search the local hybrid index")
@@ -402,7 +358,6 @@ def build_parser() -> argparse.ArgumentParser:
     search.add_argument("--top-k", type=int, default=20)
     search.add_argument("--candidate-limit", type=int, default=200)
     search.add_argument("--output", default="-")
-    add_embedding_options(search)
     search.set_defaults(func=cmd_search)
 
     review = subparsers.add_parser("review", help="export or apply teacher review decisions")
@@ -418,7 +373,6 @@ def build_parser() -> argparse.ArgumentParser:
     selector = purge.add_mutually_exclusive_group(required=True)
     selector.add_argument("--student-ref")
     selector.add_argument("--attempt-id")
-    purge.add_argument("--vector-index")
     purge.add_argument("--output", default="-")
     purge.set_defaults(func=cmd_purge)
 
@@ -438,13 +392,12 @@ def build_parser() -> argparse.ArgumentParser:
     bench.add_argument("--records", type=int, default=10000)
     bench.add_argument("--queries", type=int, default=25)
     bench.add_argument("--database")
-    bench.add_argument("--include-semantic", action="store_true")
     bench.add_argument("--output", default="-")
     bench.set_defaults(func=cmd_benchmark)
 
     capabilities = subparsers.add_parser(
         "capabilities",
-        help="report runtime capabilities, degraded components and install commands",
+        help="report packaged core-runtime capabilities",
     )
     capabilities.add_argument("--output", default="-")
     capabilities.set_defaults(func=cmd_capabilities)
@@ -465,7 +418,7 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("audit recompute requires --confirm-new-baseline")
     try:
         return int(args.func(args))
-    except (ValueError, OSError, json.JSONDecodeError, ComponentUnavailable) as exc:
+    except (ValueError, OSError, json.JSONDecodeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 

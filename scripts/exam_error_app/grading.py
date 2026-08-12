@@ -10,44 +10,6 @@ from typing import Any, Callable
 
 DecimalParser = Callable[[Any], Decimal | None]
 TextNormalizer = Callable[[Any], str]
-SymbolicAdapter = Callable[[Any, Any], tuple[bool | None, float, str | None]]
-MAX_SYMBOLIC_LENGTH = 512
-MAX_SYMBOLIC_OPERATORS = 128
-MAX_SYMBOLIC_DEPTH = 20
-MAX_SYMBOLIC_INTEGER_DIGITS = 64
-MAX_SYMBOLIC_EXPONENT = 1_000
-
-
-def _safe_symbolic_text(value: Any) -> str | None:
-    text = str(value)
-    allowed = re.compile(
-        rf"^[0-9A-Za-z+\-*/^().,=\s]{{1,{MAX_SYMBOLIC_LENGTH}}}$"
-    )
-    if not allowed.fullmatch(text):
-        return None
-    if any(
-        len(token) > MAX_SYMBOLIC_INTEGER_DIGITS
-        for token in re.findall(r"\d+", text)
-    ):
-        return None
-    if len(re.findall(r"[+\-*/^=]", text)) > MAX_SYMBOLIC_OPERATORS:
-        return None
-    depth = 0
-    for character in text:
-        if character == "(":
-            depth += 1
-            if depth > MAX_SYMBOLIC_DEPTH:
-                return None
-        elif character == ")":
-            depth -= 1
-            if depth < 0:
-                return None
-    if depth != 0:
-        return None
-    for exponent in re.findall(r"\^\s*(\d+)", text):
-        if int(exponent) > MAX_SYMBOLIC_EXPONENT:
-            return None
-    return text
 
 
 @dataclass(frozen=True)
@@ -82,22 +44,10 @@ class ObjectiveGradingService:
             return None, ""
         return self.to_decimal(match.group(1)), match.group(2).strip()
 
-    def symbolic_equivalent(self, student: Any, reference: Any) -> tuple[bool | None, float, str | None]:
-        student_text = _safe_symbolic_text(student)
-        reference_text = _safe_symbolic_text(reference)
-        if student_text is None or reference_text is None:
-            return None, 0.0, "unsafe_symbolic_input"
-        return (
-            self.normalize_text(student) == self.normalize_text(reference),
-            0.75,
-            "symbolic_equivalence_unavailable",
-        )
-
     def score(
         self,
         question: dict[str, Any],
         response: dict[str, Any],
-        symbolic_adapter: SymbolicAdapter | None = None,
     ) -> ObjectiveGradingResult:
         question_type = question["question_type"]
         reference = question.get("reference_answer")
@@ -138,12 +88,9 @@ class ObjectiveGradingService:
             if number_ok and not unit_ok:
                 reasons.append("unit_mismatch")
         elif question_type == "formula":
-            adapter = symbolic_adapter or self.symbolic_equivalent
-            correct, confidence, adapter_reason = adapter(answer, reference)
-            if adapter_reason:
-                reasons.append(adapter_reason)
-            if correct is None:
-                return ObjectiveGradingResult(None, confidence, None, tuple(reasons))
+            # The core package deliberately uses exact normalized matching.  Formulae
+            # that need equivalence transformation are routed as subjective items.
+            correct = self.normalize_text(answer) == self.normalize_text(reference)
         elif question_type == "ordered_steps":
             expected_steps = reference if isinstance(reference, list) else [reference]
             actual_steps = answer if isinstance(answer, list) else [answer]

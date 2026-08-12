@@ -68,6 +68,6 @@ benchmark
 capabilities
 ```
 
-部署前运行 `python scripts/check_runtime.py` 或 `python scripts/exam_error_cli.py capabilities`。可选的 SymPy、USearch/hnswlib HNSW、sentence-transformers 或 ONNX 组件不可用时，必须显式报告降级；`--require-semantic` 下禁止静默降级。加载本地模型必须同时提供批准的 `--model-sha256`。需要补齐增强运行时时，使用 `python -m scripts.install_runtime`；安装器默认不升级已有包，只有明确批准后才传 `--upgrade`。
+部署前运行 `python scripts/check_runtime.py` 或 `python scripts/exam_error_cli.py capabilities`。核心包只依赖 Python 和 SQLite FTS5；检索固定为本地关键词与标签检索，不下载模型、不访问网络。
 
 输入 JSON 默认上限为 256 MB，可用 `EXAM_ERROR_MAX_INPUT_MB` 下调。大规模索引默认使用 256 MB 中间内存阈值；超过阈值后，记录缓冲和 JSON 输出自动滚落到本地固态存储。索引时可用 `--memory-threshold-mb` 和 `--spill-dir` 调整；部署级默认值可用 `EXAM_ERROR_MEMORY_THRESHOLD_MB` 与 `EXAM_ERROR_SPILL_DIR` 设置。落盘目录必须位于受控、加密且空间充足的本地磁盘，并在任务结束后自动清理临时文件。

@@ -14,8 +14,6 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from retrieval_engine import (  # noqa: E402
-    ComponentUnavailable,
-    build_embedding_provider,
     fts_tokens,
     index_document,
     purge_records,
@@ -55,15 +53,6 @@ class RetrievalTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "query"):
             search_index(self.db, "x" * 4097)
 
-    def test_local_model_requires_an_approved_fingerprint(self):
-        model_dir = Path(self.temp.name) / "model"
-        model_dir.mkdir()
-        (model_dir / "config.json").write_text("{}", encoding="utf-8")
-        with self.assertRaisesRegex(ComponentUnavailable, "model-sha256"):
-            build_embedding_provider(
-                "sentence-transformers", str(model_dir), "approved-license"
-            )
-
     def test_index_is_tenant_bound_and_audited(self):
         self.assertEqual(self.index_result["records_indexed"], 4)
         self.assertEqual(verify_database_audit(self.db), [])
@@ -98,7 +87,7 @@ class RetrievalTests(unittest.TestCase):
         self.assertTrue(
             any(item["question_id"] == "q2" for item in result["results"])
         )
-        self.assertIn("semantic_embedding_provider", result["degraded_components"])
+        self.assertEqual(result["degraded_components"], [])
 
     def test_structured_filters_and_sql_injection_are_values(self):
         result = search_index(
@@ -155,10 +144,6 @@ class RetrievalTests(unittest.TestCase):
             "same-volume-temporary-then-atomic-replace",
         )
         self.assertEqual(verify_database_audit(self.db), [])
-
-    def test_require_semantic_fails_visibly(self):
-        with self.assertRaises(ComponentUnavailable):
-            search_index(self.db, "方程", require_semantic=True)
 
     def test_purge_removes_all_student_records(self):
         result = purge_records(self.db, student_ref="student-a")

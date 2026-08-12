@@ -18,7 +18,6 @@ from typing import Any, Callable
 
 from exam_error_app.audit import AuditChainService
 from exam_error_app.grading import ObjectiveGradingService
-from symbolic_adapter import safe_symbolic_equivalent
 
 
 SCHEMA_VERSION = "2.0"
@@ -28,7 +27,6 @@ MAX_QUESTIONS = 10_000
 MAX_ATTEMPTS = 100_000
 MAX_RESPONSES_PER_ATTEMPT = 10_000
 MAX_EVIDENCE_PER_RESPONSE = 1_000
-MAX_EMBEDDING_DIMENSION = 8_192
 MAX_ANSWER_ITEMS = 1_000
 QUESTION_TYPES = {
     "single_choice",
@@ -394,8 +392,6 @@ def migrate_v1(data: dict[str, Any]) -> dict[str, Any]:
                 "difficulty": old.get("difficulty") if old.get("difficulty") in {"easy", "medium", "hard"} else "unknown",
                 "tags": question_tags,
                 "source": source,
-                "semantic_embedding": old.get("semantic_embedding"),
-                "embedding_model_fingerprint": old.get("embedding_model_fingerprint"),
             }
         )
         responses_out.append(
@@ -638,8 +634,6 @@ def validate_v2(data: Any) -> list[str]:
                 "difficulty",
                 "tags",
                 "source",
-                "semantic_embedding",
-                "embedding_model_fingerprint",
             },
             location,
             errors,
@@ -718,17 +712,6 @@ def validate_v2(data: Any) -> list[str]:
             if rubric_points and maximum is not None and rubric_total != maximum:
                 errors.append(f"{location}.rubric_points: total must equal question max_score")
         _validate_source(question.get("source"), f"{location}.source", errors)
-        embedding = question.get("semantic_embedding")
-        if embedding is not None and (
-            not isinstance(embedding, list)
-            or not embedding
-            or not all(isinstance(item, (int, float)) and math.isfinite(item) for item in embedding)
-        ):
-            errors.append(f"{location}.semantic_embedding: must be a finite numeric array or null")
-        elif isinstance(embedding, list) and len(embedding) > MAX_EMBEDDING_DIMENSION:
-            errors.append(
-                f"{location}.semantic_embedding: exceeds {MAX_EMBEDDING_DIMENSION} dimensions"
-            )
 
     if declared_max is not None and declared_max != calculated_max:
         errors.append("paper.max_score: does not equal the sum of question max scores")
@@ -1163,12 +1146,10 @@ def validate_v2(data: Any) -> list[str]:
 def score_objective(
     question: dict[str, Any],
     response: dict[str, Any],
-    symbolic_adapter: Callable[[Any, Any], tuple[bool | None, float, str | None]] | None = None,
 ) -> tuple[Decimal | None, float | None, int | None, list[str]]:
     return ObjectiveGradingService(normalize_text, to_decimal).score(
         question,
         response,
-        symbolic_adapter=symbolic_adapter or safe_symbolic_equivalent,
     ).as_tuple()
 
 
@@ -1339,7 +1320,6 @@ def analyze_document(data: dict[str, Any]) -> dict[str, Any]:
                 mandatory_review
                 or low_dimensions
                 or "numeric_parse_failed" in reasons
-                or "symbolic_parse_failed" in reasons
             ):
                 response["review_status"] = "needs_review"
             elif question_type == "subjective":
@@ -1552,20 +1532,16 @@ def build_graph(data: dict[str, Any], threshold: float = 0.2, index_version: str
                 "knowledge": knowledge,
                 "cognitive": cognitive,
                 "error": stats["error_tags"],
-                "embedding": question.get("semantic_embedding"),
             }
         )
     edges = []
-    weights = {"knowledge": 0.50, "cognitive": 0.25, "error": 0.15, "semantic": 0.10}
+    weights = {"knowledge": 0.55, "cognitive": 0.28, "error": 0.17}
     for left, right in itertools.combinations(relation_items, 2):
         values = []
         for dimension in ("knowledge", "cognitive", "error"):
             value = weighted_jaccard(left[dimension], right[dimension])
             if value is not None:
                 values.append((dimension, value, weights[dimension]))
-        semantic = cosine_similarity(left["embedding"], right["embedding"])
-        if semantic is not None:
-            values.append(("semantic", semantic, weights["semantic"]))
         total_weight = sum(item[2] for item in values)
         score = sum(item[1] * item[2] for item in values) / total_weight if total_weight else 0.0
         if score >= threshold:

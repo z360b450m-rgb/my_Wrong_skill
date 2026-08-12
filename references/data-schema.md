@@ -25,7 +25,6 @@
 - `difficulty`：`easy|medium|hard|unknown`
 - `tags`：只放题目固有的 `knowledge` 和 `cognitive` 标签
 - `source`：可选的统一来源对象
-- `semantic_embedding`：可选的预计算向量，不得混用不同模型
 
 题型支持 `single_choice`、`multiple_choice`、`true_false`、`fill_blank`、`numeric`、`formula`、`ordered_steps` 和 `subjective`。
 

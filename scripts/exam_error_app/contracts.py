@@ -118,8 +118,6 @@ class IndexRecord(TypedDict):
     source_refs_json: str
     content_text: str
     tags: list[JsonObject]
-    embedding: list[float] | None
-    embedding_model_fingerprint: str | None
 
 
 IndexProjector = Callable[[JsonObject], list[IndexRecord]]

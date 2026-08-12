@@ -18,7 +18,7 @@ OCR 适配器返回文档、页面和块；每个块包含文本、类型、bbox
 
 必须验证模型路径存在、禁止自动下载，并在加载前将完整目录 SHA-256 与部署允许列表中的 `--model-sha256` 做常量时间比较；缺失或不匹配时失败关闭。对输出做 L2 归一化并拒绝 NaN/维度变化，不得用兼容回退绕过 `local_files_only` 或 `trust_remote_code=false`。
 
-语义 ANN 使用 USearch 或 hnswlib 的 HNSW 实现；运行时把 `vector_backend`、模型指纹、维度和许可证写入数据库 metadata。切换后端或模型必须重建索引。
+索引只使用 SQLite FTS5 和结构化标签。运行时不会加载模型、建立向量索引或下载第三方模型。
 
 ## 外部服务门禁
 

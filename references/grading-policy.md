@@ -28,7 +28,7 @@
 
 OCR 改变数学符号、答案存在多解、评分标准未覆盖学生方法、题答错位或任一关键字段冲突时，一律 `needs_review`。主观题一律至少 `provisional` 并进入教师队列。
 
-公式等价校验只接受受限字符集，并限制文本长度、整数位数、运算符数量、括号深度和指数大小。SymPy 只在隔离子进程中运行，默认 2 秒超时；超时返回 `symbolic_timeout`。超过静态计算预算时返回 `unsafe_symbolic_input`，两种情况都进入复核，不得在主进程继续化简。
+公式题仅比较规范化后的文本；需要等价变形判断的题目应设为主观题或进入教师复核。核心包不执行符号计算，也不会运行学生答案中的任何代码。
 
 适配器用以下稳定原因码传递强制复核信号：`ocr_math_symbol_changed`、`multiple_valid_answers`、`rubric_method_uncovered`、`rubric_gap`、`answer_misaligned`、`critical_field_conflict`。对应的受控错因标签 `ocr-symbol-error`、`answer-misaligned`、`rubric-gap`、`extraction-error` 也会触发强制复核；分析器不得覆盖这些输入信号。
 

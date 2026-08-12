@@ -186,7 +186,7 @@ class CliSmokeTests(unittest.TestCase):
             capabilities = self.run_cli("capabilities")
             capability_data = json.loads(capabilities.stdout)
             self.assertEqual(capability_data["service"], "analyze-exam-errors")
-            self.assertIn("install_recommended", capability_data["commands"])
+        self.assertNotIn("install_recommended", capability_data["commands"])
 
 
 if __name__ == "__main__":

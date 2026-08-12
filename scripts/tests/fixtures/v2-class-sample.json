@@ -32,9 +32,7 @@
             "confidence": 0.96
           }
         ],
-        "source": null,
-        "semantic_embedding": [1.0, 0.0, 0.0],
-        "embedding_model_fingerprint": "fixture:model-v1"
+        "source": null
       },
       {
         "question_id": "q2",
@@ -60,9 +58,7 @@
             "confidence": 0.93
           }
         ],
-        "source": null,
-        "semantic_embedding": [0.8, 0.2, 0.0],
-        "embedding_model_fingerprint": "fixture:model-v1"
+        "source": null
       }
     ]
   },

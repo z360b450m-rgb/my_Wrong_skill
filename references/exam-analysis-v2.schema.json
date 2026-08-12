@@ -433,19 +433,6 @@
         },
         "source": {
           "$ref": "#/$defs/source"
-        },
-        "semantic_embedding": {
-          "type": [
-            "array",
-            "null"
-          ],
-          "maxItems": 8192,
-          "items": {
-            "type": "number"
-          }
-        },
-        "embedding_model_fingerprint": {
-          "$ref": "#/$defs/nullableString"
         }
       }
     },

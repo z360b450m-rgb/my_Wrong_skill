@@ -101,8 +101,6 @@ def iter_index_records(
                     source_refs_json=canonical_json(source_refs),
                     content_text=content,
                     tags=tags,
-                    embedding=question.get("semantic_embedding"),
-                    embedding_model_fingerprint=question.get("embedding_model_fingerprint"),
             )
 
 

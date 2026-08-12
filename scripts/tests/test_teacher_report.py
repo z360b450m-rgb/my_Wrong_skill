@@ -13,7 +13,7 @@ SKILL_DIR = SCRIPT_DIR.parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from exam_error_core import compute_statistics, export_review_queue  # noqa: E402
+from exam_error_core import analyze_document, compute_statistics, export_review_queue  # noqa: E402
 from exam_error_app import display_labels as display  # noqa: E402
 from exam_error_app.teacher_report_contract import (  # noqa: E402
     TEACHER_REPORT_VIEW_VERSION,
@@ -29,6 +29,31 @@ from teacher_report_renderer import (  # noqa: E402
 
 
 class TeacherReportTests(unittest.TestCase):
+    def test_subjective_review_contains_rubric_based_advice(self):
+        data = json.loads(
+            (SCRIPT_DIR / "tests" / "fixtures" / "v2-class-sample.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        question = data["paper"]["questions"][0]
+        question["question_type"] = "subjective"
+        question["rubric_points"] = [
+            {"rubric_id": "rp-method", "description": "写出解题方法", "max_score": 2},
+            {"rubric_id": "rp-conclusion", "description": "给出完整结论", "max_score": 2},
+        ]
+        response = data["attempts"][0]["responses"][0]
+        response["rubric_results"] = [
+            {"rubric_id": "rp-method", "awarded_score": 1, "evidence_ids": [], "status": "suggested"}
+        ]
+        model = build_teacher_report_model(
+            analyze_document(data),
+            statistics_builder=compute_statistics,
+            review_exporter=export_review_queue,
+        )
+        item = next(row for row in model["review_items"] if row["question_code"] == "q1")
+        self.assertTrue(any("写出解题方法" in text for text in item["suggestions"]))
+        self.assertTrue(any("给出完整结论" in text for text in item["suggestions"]))
+
     def test_single_file_teacher_report_is_safe_and_complete(self):
         data = json.loads(
             (SCRIPT_DIR / "tests" / "fixtures" / "v2-class-sample.json").read_text(

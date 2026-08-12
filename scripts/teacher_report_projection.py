@@ -39,6 +39,40 @@ def _top_codes(
     return codes, [labeler(code) for code in codes]
 
 
+def _subjective_suggestions(question: dict[str, Any], response: dict[str, Any]) -> list[str]:
+    """Create review guidance from the student's response and declared rubric only."""
+    answer = str(response.get("normalized_answer") or "").strip()
+    rubric_by_id = {
+        item.get("rubric_id"): item for item in question.get("rubric_points", [])
+        if isinstance(item, dict) and item.get("rubric_id")
+    }
+    results = {
+        item.get("rubric_id"): item for item in response.get("rubric_results", [])
+        if isinstance(item, dict) and item.get("rubric_id")
+    }
+    suggestions: list[str] = []
+    if not answer:
+        suggestions.append("学生未提供可识别作答；请先补写后再按评分点评阅。")
+    for rubric_id, rubric in rubric_by_id.items():
+        result = results.get(rubric_id)
+        maximum = to_decimal(rubric.get("max_score")) or Decimal("0")
+        awarded = to_decimal(result.get("awarded_score")) if result else None
+        if result and result.get("status") == "teacher_confirmed" and awarded == maximum:
+            continue
+        description = str(rubric.get("description") or rubric_id)
+        if awarded is None:
+            suggestions.append(f"请对照评分点“{description}”核对作答是否覆盖，并由教师给出分数。")
+        elif awarded < maximum:
+            suggestions.append(f"建议完善“{description}”（当前建议 {decimal_json(awarded)}/{decimal_json(maximum)} 分）。")
+    if not rubric_by_id:
+        reference = str(question.get("reference_answer") or "").strip()
+        suggestions.append(
+            f"请将学生作答与参考答案“{reference[:120]}”逐项比对，再给出教师评分。"
+            if reference else "题目未提供评分点或参考答案；请教师依据题意补充评分建议。"
+        )
+    return suggestions
+
+
 def build_teacher_report_model(
     data: dict[str, Any],
     *,
@@ -293,9 +327,18 @@ def build_teacher_report_model(
         )
 
     review_items = []
+    response_lookup = {
+        (attempt.get("attempt_id"), response.get("question_id")): response
+        for attempt in data.get("attempts", [])
+        for response in attempt.get("responses", [])
+        if isinstance(response, dict)
+    }
     for review in review_export.get("items", []):
         question_id = review.get("question_id")
         reason_codes = sorted(review.get("reasons", []))
+        question = questions.get(question_id, {})
+        response = response_lookup.get((review.get("attempt_id"), question_id), {})
+        suggestions = _subjective_suggestions(question, response) if question.get("question_type") == "subjective" else []
         review_items.append(
             {
                 "attempt_id": review.get("attempt_id"),
@@ -316,9 +359,8 @@ def build_teacher_report_model(
                     else display.question_label(None)
                 ),
                 "reason_codes": reason_codes,
-                "reasons": [
-                    display.review_reason_label(code) for code in reason_codes
-                ],
+                "reasons": [display.review_reason_label(code) for code in reason_codes] + suggestions,
+                "suggestions": suggestions,
             }
         )
     review_items.sort(

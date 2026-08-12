@@ -13,6 +13,7 @@ description: Generate one self-contained teacher HTML report from exam paper ima
    python scripts/exam_error_cli.py <input.json> <teacher-report.html>
    ```
 
-4. Deliver the generated HTML file. It includes deterministic scoring, error evidence, teacher review items, and class/student summaries. Do not create separate statistics files, graphs, indexes, search databases, or alternative reports.
+4. For subjective questions, extract the student's answer, reference answer, and each rubric point. Record any rubric-level suggested score and evidence when available. The report must give response-specific improvement advice for uncovered or partially met rubric points, while keeping the score provisional until the teacher confirms it.
+5. Deliver the generated HTML file. It includes deterministic scoring, error evidence, teacher review items, subjective-question advice, and class/student summaries. Do not create separate statistics files, graphs, indexes, search databases, or alternative reports.
 
 Read `references/grading-policy.md`, `references/error-taxonomy.md`, and `references/display-conventions.md` before producing a report. Read `references/adapter-contracts.md` when converting OCR/PDF output.

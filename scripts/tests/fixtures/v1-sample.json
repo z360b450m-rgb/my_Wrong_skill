@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "organization_id": "school-demo",
+  "paper_id": "paper-math-001",
+  "student_id": "student-001",
+  "attempt_id": "attempt-001",
+  "class_id": "class-8a",
+  "subject": "math",
+  "grade": "grade-8",
+  "curriculum_version": "generic-math-v1",
+  "created_at": "2026-07-29T09:00:00+08:00",
+  "questions": [
+    {
+      "question_id": "q1",
+      "question_type": "choice",
+      "question_text": "下列方程的解是？",
+      "student_answer": "B",
+      "reference_answer": "B",
+      "max_score": 5,
+      "score": 5,
+      "difficulty": "easy",
+      "ocr_confidence": 0.99,
+      "grading_confidence": 0.99,
+      "review_status": "confirmed",
+      "source": {
+        "document_id": "doc-001",
+        "page": 1,
+        "bbox": [10, 20, 300, 180],
+        "bbox_unit": "pixel",
+        "raw_text": "B",
+        "file_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tags": [
+        {
+          "dimension": "knowledge",
+          "name": "math/algebra/equation/linear",
+          "confidence": 0.98
+        },
+        {
+          "dimension": "cognitive",
+          "name": "apply",
+          "confidence": 0.95
+        }
+      ],
+      "error_evidence": []
+    },
+    {
+      "question_id": "q2",
+      "question_type": "numeric",
+      "question_text": "计算线段长度并写出单位。",
+      "student_answer": "5 cm",
+      "reference_answer": "6 cm",
+      "max_score": 5,
+      "score": 0,
+      "difficulty": "medium",
+      "ocr_confidence": 0.96,
+      "grading_confidence": 0.98,
+      "review_status": "confirmed",
+      "source": {
+        "document_id": "doc-001",
+        "page": 1,
+        "bbox": [10, 200, 300, 360],
+        "bbox_unit": "pixel",
+        "raw_text": "5 cm",
+        "file_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tags": [
+        {
+          "dimension": "knowledge",
+          "name": "math/geometry",
+          "confidence": 0.96
+        },
+        {
+          "dimension": "cognitive",
+          "name": "apply",
+          "confidence": 0.94
+        },
+        {
+          "dimension": "error",
+          "name": "calculation-error",
+          "confidence": 0.91
+        }
+      ],
+      "error_evidence": [
+        {
+          "error_type": "calculation-error",
+          "observed": "把 3+3 计算为 5。",
+          "explanation": "第一处因果错误发生在加法步骤。",
+          "step": 2,
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "question_id": "q3",
+      "question_type": "essay",
+      "question_text": "说明二次方程判别式的作用。",
+      "student_answer": "它可以看方程。",
+      "reference_answer": null,
+      "max_score": 10,
+      "score": null,
+      "difficulty": "hard",
+      "ocr_confidence": 0.82,
+      "grading_confidence": null,
+      "review_status": "needs_review",
+      "source": {
+        "document_id": "doc-001",
+        "page": 2,
+        "bbox": [20, 30, 400, 260],
+        "bbox_unit": "pixel",
+        "raw_text": "它可以看方程。",
+        "file_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tags": [
+        {
+          "dimension": "knowledge",
+          "name": "math/algebra/equation/quadratic",
+          "confidence": 0.92
+        },
+        {
+          "dimension": "cognitive",
+          "name": "understand",
+          "confidence": 0.90
+        }
+      ],
+      "error_evidence": [
+        {
+          "error_type": "explanation-insufficient",
+          "observed": "未说明判别式与实数根数量的关系。",
+          "explanation": "答案缺少关键结论。",
+          "confidence": 0.88
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "schema_version": "2.0",
+  "organization_id": "school-demo",
+  "analysis_id": "analysis-class-001",
+  "created_at": "2026-07-29T10:00:00+08:00",
+  "paper": {
+    "paper_id": "paper-class-001",
+    "subject": "math",
+    "grade": "grade-8",
+    "curriculum_version": "generic-math-v1",
+    "max_score": 10,
+    "questions": [
+      {
+        "question_id": "q1",
+        "question_type": "single_choice",
+        "question_text": "选择正确的一次方程解。",
+        "max_score": 5,
+        "reference_answer": "B",
+        "answer_options": ["A", "B", "C", "D"],
+        "scoring_config": null,
+        "rubric_points": [],
+        "difficulty": "easy",
+        "tags": [
+          {
+            "dimension": "knowledge",
+            "name": "math/algebra/equation/linear",
+            "confidence": 0.98
+          },
+          {
+            "dimension": "cognitive",
+            "name": "apply",
+            "confidence": 0.96
+          }
+        ],
+        "source": null,
+        "semantic_embedding": [1.0, 0.0, 0.0],
+        "embedding_model_fingerprint": "fixture:model-v1"
+      },
+      {
+        "question_id": "q2",
+        "question_type": "numeric",
+        "question_text": "求二次方程根的数量。<script>alert(1)</script>",
+        "max_score": 5,
+        "reference_answer": "2",
+        "answer_options": null,
+        "scoring_config": {
+          "tolerance": 0
+        },
+        "rubric_points": [],
+        "difficulty": "medium",
+        "tags": [
+          {
+            "dimension": "knowledge",
+            "name": "math/algebra/equation/quadratic",
+            "confidence": 0.97
+          },
+          {
+            "dimension": "cognitive",
+            "name": "analyze",
+            "confidence": 0.93
+          }
+        ],
+        "source": null,
+        "semantic_embedding": [0.8, 0.2, 0.0],
+        "embedding_model_fingerprint": "fixture:model-v1"
+      }
+    ]
+  },
+  "attempts": [
+    {
+      "attempt_id": "attempt-a",
+      "class_id": "class-8a",
+      "student_ref": "student-a",
+      "student_name": "张晨",
+      "submitted_at": "2026-07-29T09:30:00+08:00",
+      "responses": [
+        {
+          "question_id": "q1",
+          "raw_ocr_text": "B",
+          "normalized_answer": "B",
+          "score": 5,
+          "is_correct": true,
+          "confidence": {
+            "ocr": 0.99,
+            "grading": 0.99,
+            "tagging": 0.95
+          },
+          "review_status": "auto_confirmed",
+          "review_reasons": [],
+          "rubric_results": [],
+          "first_error_step": null,
+          "evidence": [],
+          "error_tags": [],
+          "suggested_tags": [],
+          "source": null,
+          "teacher_review": null
+        },
+        {
+          "question_id": "q2",
+          "raw_ocr_text": "1",
+          "normalized_answer": "1",
+          "score": 0,
+          "is_correct": false,
+          "confidence": {
+            "ocr": 0.98,
+            "grading": 0.99,
+            "tagging": 0.92
+          },
+          "review_status": "auto_confirmed",
+          "review_reasons": [],
+          "rubric_results": [],
+          "first_error_step": 1,
+          "evidence": [
+            {
+              "evidence_id": "ev-a-q2",
+              "observed": "学生回答根的数量为 1。",
+              "explanation": "判别式判断结果与参考答案不一致。",
+              "causal_role": "causal",
+              "step": 1,
+              "confidence": 0.94,
+              "source": null
+            }
+          ],
+          "error_tags": [
+            {
+              "dimension": "error",
+              "name": "concept-confusion",
+              "confidence": 0.92,
+              "evidence_ids": ["ev-a-q2"]
+            }
+          ],
+          "suggested_tags": [],
+          "source": null,
+          "teacher_review": null
+        }
+      ]
+    },
+    {
+      "attempt_id": "attempt-b",
+      "class_id": "class-8a",
+      "student_ref": "student-b",
+      "student_name": "李雨桐",
+      "submitted_at": "2026-07-29T09:35:00+08:00",
+      "responses": [
+        {
+          "question_id": "q1",
+          "raw_ocr_text": "A",
+          "normalized_answer": "A",
+          "score": 0,
+          "is_correct": false,
+          "confidence": {
+            "ocr": 0.98,
+            "grading": 0.99,
+            "tagging": 0.89
+          },
+          "review_status": "auto_confirmed",
+          "review_reasons": [],
+          "rubric_results": [],
+          "first_error_step": 1,
+          "evidence": [
+            {
+              "evidence_id": "ev-b-q1",
+              "observed": "选择 A，参考答案为 B。",
+              "explanation": "客观题答案不一致。",
+              "causal_role": "causal",
+              "step": 1,
+              "confidence": 0.99,
+              "source": null
+            }
+          ],
+          "error_tags": [
+            {
+              "dimension": "error",
+              "name": "unclassified",
+              "confidence": 0.89,
+              "evidence_ids": ["ev-b-q1"]
+            }
+          ],
+          "suggested_tags": [],
+          "source": null,
+          "teacher_review": null
+        },
+        {
+          "question_id": "q2",
+          "raw_ocr_text": "2",
+          "normalized_answer": "2",
+          "score": 5,
+          "is_correct": true,
+          "confidence": {
+            "ocr": 0.99,
+            "grading": 0.99,
+            "tagging": 0.95
+          },
+          "review_status": "auto_confirmed",
+          "review_reasons": [],
+          "rubric_results": [],
+          "first_error_step": null,
+          "evidence": [],
+          "error_tags": [],
+          "suggested_tags": [],
+          "source": null,
+          "teacher_review": null
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "input_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "source_files": [],
+    "adapters": [],
+    "model_calls": [],
+    "migration_warnings": []
+  },
+  "review_queue": [],
+  "audit_log": [
+    {
+      "event_id": "evt-fixture-import-001",
+      "timestamp": "2026-07-29T00:00:00Z",
+      "event_type": "import.completed",
+      "actor_ref": "system",
+      "payload_hash": "sha256:06f4b2cae536eca9edfd83afe4d0a44d41b85df27ed4ee6e2cca2bfa72b79c19",
+      "previous_hash": null,
+      "event_hash": "sha256:06da6199763e12a3a78daaa6c06f9f6232bc1b47d8f5302f4a1fc700315a1ff3"
+    },
+    {
+      "event_id": "evt-fixture-recompute-001",
+      "timestamp": "2026-08-08T00:00:00+08:00",
+      "event_type": "audit.recomputed",
+      "actor_ref": "fixture-maintainer",
+      "payload_hash": "sha256:32cfeb92e1ee778ae4b029811f03adac27a078662a8d1a75fb35e6a74573e637",
+      "previous_hash": "sha256:06da6199763e12a3a78daaa6c06f9f6232bc1b47d8f5302f4a1fc700315a1ff3",
+      "state_hash": "sha256:2ac7aa358b647e5512b861a0c8076e76ce99686f73ba856457960a64abbd0c0f",
+      "event_hash": "sha256:810a5ecfc6f60ae10f45d99fced7d2171ce4e628d90685afa8465fc216006ce2"
+    }
+  ]
+}

@@ -1,0 +1,901 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/analyze-exam-errors/exam-analysis-v2.schema.json",
+  "title": "Exam Error Analysis v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "organization_id",
+    "analysis_id",
+    "created_at",
+    "paper",
+    "attempts",
+    "provenance",
+    "review_queue",
+    "audit_log"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "organization_id": {
+      "$ref": "#/$defs/id"
+    },
+    "analysis_id": {
+      "$ref": "#/$defs/id"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paper": {
+      "$ref": "#/$defs/paper"
+    },
+    "attempts": {
+      "type": "array",
+      "maxItems": 100000,
+      "items": {
+        "$ref": "#/$defs/attempt"
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "review_queue": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reviewItem"
+      }
+    },
+    "audit_log": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/auditEvent"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "nullableString": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 100000
+    },
+    "nullableNumber": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "answerValue": {
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 100000
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 100000
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-fA-F]{64}$"
+    },
+    "confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "source": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "document_id",
+        "page",
+        "bbox",
+        "bbox_unit",
+        "raw_text",
+        "file_hash"
+      ],
+      "properties": {
+        "document_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "page": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "bbox": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "minItems": 4,
+              "maxItems": 4
+            }
+          ]
+        },
+        "bbox_unit": {
+          "enum": [
+            "pixel",
+            "normalized",
+            null
+          ]
+        },
+        "raw_text": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "file_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "questionTag": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/tag"
+        },
+        {
+          "properties": {
+            "dimension": {
+              "enum": [
+                "knowledge",
+                "cognitive"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "errorTag": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/tag"
+        },
+        {
+          "required": [
+            "evidence_ids"
+          ],
+          "properties": {
+            "dimension": {
+              "const": "error"
+            },
+            "name": {
+              "enum": [
+                "concept-missing",
+                "concept-confusion",
+                "theorem-misuse",
+                "formula-misuse",
+                "invalid-inference",
+                "condition-omitted",
+                "case-incomplete",
+                "strategy-mismatch",
+                "calculation-error",
+                "sign-error",
+                "transformation-error",
+                "step-omitted",
+                "requirement-misread",
+                "condition-missed",
+                "diagram-misread",
+                "unit-missing",
+                "notation-invalid",
+                "conclusion-incomplete",
+                "explanation-insufficient",
+                "unanswered",
+                "illegible",
+                "answer-misaligned",
+                "ocr-symbol-error",
+                "extraction-error",
+                "rubric-gap",
+                "unclassified"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "suggestedErrorTag": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/tag"
+        },
+        {
+          "properties": {
+            "dimension": {
+              "const": "error"
+            }
+          }
+        }
+      ]
+    },
+    "tag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dimension",
+        "name",
+        "confidence"
+      ],
+      "properties": {
+        "dimension": {
+          "enum": [
+            "knowledge",
+            "cognitive",
+            "error"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "dimension": {
+                "const": "cognitive"
+              }
+            },
+            "required": [
+              "dimension"
+            ]
+          },
+          "then": {
+            "properties": {
+              "name": {
+                "enum": [
+                  "remember",
+                  "understand",
+                  "apply",
+                  "analyze",
+                  "evaluate",
+                  "create"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "rubricPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rubric_id",
+        "description",
+        "max_score"
+      ],
+      "properties": {
+        "rubric_id": {
+          "$ref": "#/$defs/id"
+        },
+        "description": {
+          "type": "string"
+        },
+        "max_score": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "question_id",
+        "question_type",
+        "question_text",
+        "max_score",
+        "reference_answer",
+        "rubric_points",
+        "difficulty",
+        "tags",
+        "source"
+      ],
+      "properties": {
+        "question_id": {
+          "$ref": "#/$defs/id"
+        },
+        "question_type": {
+          "enum": [
+            "single_choice",
+            "multiple_choice",
+            "true_false",
+            "fill_blank",
+            "numeric",
+            "formula",
+            "ordered_steps",
+            "subjective"
+          ]
+        },
+        "question_text": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "max_score": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reference_answer": {
+          "$ref": "#/$defs/answerValue"
+        },
+        "answer_options": {
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "scoring_config": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "rubric_points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rubricPoint"
+          }
+        },
+        "difficulty": {
+          "enum": [
+            "easy",
+            "medium",
+            "hard",
+            "unknown"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/questionTag"
+          }
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "semantic_embedding": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "maxItems": 8192,
+          "items": {
+            "type": "number"
+          }
+        },
+        "embedding_model_fingerprint": {
+          "$ref": "#/$defs/nullableString"
+        }
+      }
+    },
+    "paper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paper_id",
+        "subject",
+        "grade",
+        "curriculum_version",
+        "max_score",
+        "questions"
+      ],
+      "properties": {
+        "paper_id": {
+          "$ref": "#/$defs/id"
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "grade": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "curriculum_version": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "max_score": {
+          "type": "number",
+          "minimum": 0
+        },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/question"
+          }
+        }
+      }
+    },
+    "confidenceSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ocr",
+        "grading",
+        "tagging"
+      ],
+      "properties": {
+        "ocr": {
+          "$ref": "#/$defs/confidence"
+        },
+        "grading": {
+          "$ref": "#/$defs/confidence"
+        },
+        "tagging": {
+          "$ref": "#/$defs/confidence"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "observed",
+        "explanation",
+        "causal_role",
+        "step",
+        "confidence",
+        "source"
+      ],
+      "properties": {
+        "evidence_id": {
+          "$ref": "#/$defs/id"
+        },
+        "observed": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "causal_role": {
+          "enum": [
+            "causal",
+            "consequential",
+            "context"
+          ]
+        },
+        "step": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        }
+      }
+    },
+    "rubricResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rubric_id",
+        "awarded_score",
+        "evidence_ids",
+        "status"
+      ],
+      "properties": {
+        "rubric_id": {
+          "$ref": "#/$defs/id"
+        },
+        "awarded_score": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "suggested",
+            "teacher_confirmed",
+            "rejected"
+          ]
+        }
+      }
+    },
+    "teacherReview": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "actor_ref",
+        "reviewed_at",
+        "decision",
+        "reason",
+        "before",
+        "after"
+      ],
+      "properties": {
+        "actor_ref": {
+          "$ref": "#/$defs/id"
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "decision": {
+          "enum": [
+            "confirm",
+            "modify",
+            "reject"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "before": {},
+        "after": {}
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "question_id",
+        "raw_ocr_text",
+        "normalized_answer",
+        "score",
+        "is_correct",
+        "confidence",
+        "review_status",
+        "review_reasons",
+        "rubric_results",
+        "first_error_step",
+        "evidence",
+        "error_tags",
+        "suggested_tags",
+        "source",
+        "teacher_review"
+      ],
+      "properties": {
+        "question_id": {
+          "$ref": "#/$defs/id"
+        },
+        "raw_ocr_text": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "normalized_answer": {
+          "$ref": "#/$defs/answerValue"
+        },
+        "score": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "is_correct": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidenceSet"
+        },
+        "review_status": {
+          "enum": [
+            "unreviewed",
+            "provisional",
+            "needs_review",
+            "auto_confirmed",
+            "teacher_confirmed",
+            "rejected"
+          ]
+        },
+        "review_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "rubric_results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rubricResult"
+          }
+        },
+        "first_error_step": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "evidence": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+        "error_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/errorTag"
+          }
+        },
+        "suggested_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/suggestedErrorTag"
+          }
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "teacher_review": {
+          "$ref": "#/$defs/teacherReview"
+        }
+      }
+    },
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_id",
+        "class_id",
+        "student_ref",
+        "submitted_at",
+        "responses"
+      ],
+      "properties": {
+        "attempt_id": {
+          "$ref": "#/$defs/id"
+        },
+        "class_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "student_ref": {
+          "$ref": "#/$defs/id"
+        },
+        "student_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "submitted_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "responses": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/response"
+          }
+        }
+      }
+    },
+    "reviewItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "review_id",
+        "attempt_id",
+        "question_id",
+        "reasons",
+        "status",
+        "created_at"
+      ],
+      "properties": {
+        "review_id": {
+          "$ref": "#/$defs/id"
+        },
+        "attempt_id": {
+          "$ref": "#/$defs/id"
+        },
+        "question_id": {
+          "$ref": "#/$defs/id"
+        },
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "enum": [
+            "open",
+            "resolved",
+            "rejected"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_hash",
+        "source_files",
+        "adapters",
+        "model_calls",
+        "migration_warnings"
+      ],
+      "properties": {
+        "input_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_files": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "adapters": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "model_calls": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "migration_warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "auditEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "timestamp",
+        "event_type",
+        "actor_ref",
+        "payload_hash",
+        "previous_hash",
+        "event_hash"
+      ],
+      "properties": {
+        "event_id": {
+          "$ref": "#/$defs/id"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "event_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actor_ref": {
+          "$ref": "#/$defs/id"
+        },
+        "payload_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "previous_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "event_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  }
+}

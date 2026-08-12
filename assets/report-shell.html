@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'nonce-{{CSP_NONCE}}'; img-src data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>{{TITLE}}</title>
+  <style nonce="{{CSP_NONCE}}">
+    :root{color-scheme:light;--ink:#172033;--muted:#5e6b7f;--line:#dfe5ed;--panel:#f7f9fc;--accent:#3157d5}
+    *{box-sizing:border-box}body{margin:0;background:#eef2f7;color:var(--ink);font:15px/1.65 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+    main{max-width:1080px;margin:32px auto;padding:36px 44px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 40px #17203312}
+    h1{margin-top:0;font-size:30px}h2{margin-top:34px;padding-bottom:9px;border-bottom:1px solid var(--line);font-size:21px}
+    h3{font-size:17px}table{width:100%;border-collapse:collapse;margin:14px 0}th,td{padding:9px 11px;border:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--panel)}.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    .metric{padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.metric strong{display:block;font-size:23px;color:var(--accent)}
+    .muted{color:var(--muted)}.warning{padding:12px 14px;border-left:4px solid #d78b16;background:#fff8e8}
+    code{white-space:pre-wrap;word-break:break-word}ul{padding-left:22px}
+    @media print{body{background:#fff}main{margin:0;border:0;box-shadow:none;max-width:none}}
+  </style>
+</head>
+<body><main>{{BODY}}</main></body>
+</html>

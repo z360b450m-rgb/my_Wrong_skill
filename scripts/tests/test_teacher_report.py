@@ -18,13 +18,14 @@ from exam_error_app import display_labels as display  # noqa: E402
 from exam_error_app.teacher_report_contract import (  # noqa: E402
     TEACHER_REPORT_VIEW_VERSION,
 )
-from teacher_reporting import build_teacher_report_model, write_teacher_report  # noqa: E402
+from teacher_report_projection import build_teacher_report_model  # noqa: E402
 from teacher_report_renderer import (  # noqa: E402
     TEACHER_REPORT_RENDERER_VERSION,
     TEACHER_REPORT_TEMPLATE_SHA256,
     TEACHER_REPORT_TEMPLATE_VERSION,
     build_teacher_report_manifest,
     render_teacher_report_html,
+    write_teacher_report_html,
 )
 
 
@@ -62,12 +63,16 @@ class TeacherReportTests(unittest.TestCase):
         )
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "teacher-report.html"
-            write_teacher_report(
+            model = build_teacher_report_model(
                 data,
-                output,
-                SKILL_DIR / "assets" / "teacher-report.html",
                 statistics_builder=compute_statistics,
                 review_exporter=export_review_queue,
+            )
+            write_teacher_report_html(
+                render_teacher_report_html(
+                    model, SKILL_DIR / "assets" / "teacher-report.html"
+                ),
+                output,
             )
             html = output.read_text(encoding="utf-8")
             self.assertIn("教师错题分析报告", html)
